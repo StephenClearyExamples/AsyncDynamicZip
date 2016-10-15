@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Ionic.Zip;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
@@ -16,13 +17,28 @@ namespace WebApplication.Controllers
 
         // http://localhost:24425/api/file
         [HttpGet]
-        public async Task<FileStreamResult> Get()
+        public FileCallbackResult Get()
         {
-            var stream = await Client.GetStreamAsync("https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/README.md");
-
-            return new FileStreamResult(stream, new MediaTypeHeaderValue("text/plain"))
+            var filenamesAndUrls = new Dictionary<string, string>
             {
-                FileDownloadName = "README.md"
+                { "README.md", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/README.md" },
+                { ".gitignore", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/.gitignore" },
+            };
+
+            return new FileCallbackResult(new MediaTypeHeaderValue("application/octet-stream"), async (outputStream, _) =>
+            {
+                using (var zipStream = new ZipOutputStream(outputStream))
+                {
+                    foreach (var kvp in filenamesAndUrls)
+                    {
+                        zipStream.PutNextEntry(kvp.Key);
+                        using (var stream = await Client.GetStreamAsync(kvp.Value))
+                            await stream.CopyToAsync(zipStream);
+                    }
+                }
+            })
+            {
+                FileDownloadName = "MyZipfile.zip"
             };
         }
     }
