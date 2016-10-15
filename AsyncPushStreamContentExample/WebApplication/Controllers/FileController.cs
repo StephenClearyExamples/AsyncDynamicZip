@@ -5,8 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using System.Web.Http;
+using Ionic.Zip;
 
 namespace WebApplication.Controllers
 {
@@ -15,16 +15,31 @@ namespace WebApplication.Controllers
         private static HttpClient Client { get; } = new HttpClient();
 
         // http://localhost:12084/api/file
-        public async Task<HttpResponseMessage> Get()
+        public HttpResponseMessage Get()
         {
-            var stream = await Client.GetStreamAsync("https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/README.md");
+            var filenamesAndUrls = new Dictionary<string, string>
+            {
+                { "README.md", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/README.md" },
+                { ".gitignore", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/.gitignore" },
+            };
 
             var result = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StreamContent(stream),
+                Content = new PushStreamContent(async (outputStream, httpContext, transportContext) =>
+                {
+                    using (var zipStream = new ZipOutputStream(outputStream))
+                    {
+                        foreach (var kvp in filenamesAndUrls)
+                        {
+                            zipStream.PutNextEntry(kvp.Key);
+                            using (var stream = await Client.GetStreamAsync(kvp.Value))
+                                await stream.CopyToAsync(zipStream);
+                        }
+                    }
+                }),
             };
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
-            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "README.md" };
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "MyZipfile.zip" };
             return result;
         }
     }
