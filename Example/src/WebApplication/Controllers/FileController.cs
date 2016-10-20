@@ -21,8 +21,8 @@ namespace WebApplication.Controllers
         {
             var filenamesAndUrls = new Dictionary<string, string>
             {
-                { "README.md", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/README.md" },
-                { ".gitignore", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncPushStreamContent/master/.gitignore" },
+                { "README.md", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncDynamicZip/master/README.md" },
+                { ".gitignore", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncDynamicZip/master/.gitignore" },
             };
 
             return new FileCallbackResult(new MediaTypeHeaderValue("application/octet-stream"), async (outputStream, _) =>
