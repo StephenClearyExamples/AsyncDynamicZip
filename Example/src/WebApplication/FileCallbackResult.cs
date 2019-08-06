@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.Net.Http.Headers;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace WebApplication
 {
@@ -86,7 +84,7 @@ namespace WebApplication
 
             public Task ExecuteAsync(ActionContext context, FileCallbackResult result)
             {
-                SetHeadersAndLog(context, result);
+                SetHeadersAndLog(context, result, null, false);
                 return result.Callback(context.HttpContext.Response.Body, context);
             }
         }
