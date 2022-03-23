@@ -13,6 +13,6 @@ There are five examples in this repository, each on its own branch:
 - [full-ziparchive](https://github.com/StephenClearyExamples/AsyncDynamicZip/tree/full-ziparchive) - ASP.NET (.NET 4.6.1) using the built-in `ZipArchive`
 - [full-dotnetzip](https://github.com/StephenClearyExamples/AsyncDynamicZip/tree/full-dotnetzip) - ASP.NET (.NET 4.6.1) using `DotNetZip`
 
-Both of the `ZipArchive` repositories include a workaround for a bug in that class.
+The `core-ziparchive` and `full-ziparchive` branches include a workaround for a bug in the `ZipArchive` class on those platforms. The `net6-ziparchive` does not include that workaround since the bug has been fixed.
 
-Both of the ASP.NET Core repositories include their own `FileCallbackResult` to asynchronously stream output on demand.
+The `net6-ziparchive`, `core-ziparchive`, and `core-dotnetzip` branches include their own `FileCallbackResult` to asynchronously stream output on demand.
