@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.IO.Compression;
 
 namespace WebApplication.Controllers
 {
@@ -6,18 +7,34 @@ namespace WebApplication.Controllers
     [Route("[controller]")]
     public class FileController : ControllerBase
     {
-        private readonly ILogger<FileController> _logger;
-
-        public FileController(ILogger<FileController> logger)
-        {
-            _logger = logger;
-        }
+        private static HttpClient Client { get; } = new HttpClient();
 
         // http://localhost:5130/file
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(13);
+            var filenamesAndUrls = new Dictionary<string, string>
+            {
+                { "README.md", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncDynamicZip/master/README.md" },
+                { ".gitignore", "https://raw.githubusercontent.com/StephenClearyExamples/AsyncDynamicZip/master/.gitignore" },
+            };
+
+            return new FileCallbackResult("application/octet-stream", async (outputStream, _) =>
+            {
+                using (var zipArchive = new ZipArchive(outputStream, ZipArchiveMode.Create))
+                {
+                    foreach (var kvp in filenamesAndUrls)
+                    {
+                        var zipEntry = zipArchive.CreateEntry(kvp.Key);
+                        using (var zipStream = zipEntry.Open())
+                        using (var stream = await Client.GetStreamAsync(kvp.Value))
+                            await stream.CopyToAsync(zipStream);
+                    }
+                }
+            })
+            {
+                FileDownloadName = "MyZipfile.zip"
+            };
         }
     }
 }
