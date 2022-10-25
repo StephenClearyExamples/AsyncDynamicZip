@@ -41,7 +41,7 @@ namespace WebApplication
             public Task ExecuteAsync(ActionContext context, FileCallbackResult result)
             {
                 SetHeadersAndLog(context, result, fileLength: null, enableRangeProcessing: false);
-                return result._callback(context.HttpContext.Response.Body, context);
+                return result._callback(context.HttpContext.Response.BodyWriter.AsStream(), context);
             }
         }
     }
